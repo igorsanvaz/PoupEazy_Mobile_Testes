@@ -103,10 +103,10 @@ export default function TransactionFormScreen() {
       )} />
       <View style={styles.form}>
         <Controller control={control} name="description" render={({ field }) => (
-          <TextField label="Descrição" placeholder="Ex.: Supermercado" autoCapitalize="sentences" value={field.value} onBlur={field.onBlur} onChangeText={field.onChange} error={errors.description?.message} />
+          <TextField testID="transaction-description" label="Descrição" placeholder="Ex.: Supermercado" autoCapitalize="sentences" value={field.value} onBlur={field.onBlur} onChangeText={field.onChange} error={errors.description?.message} />
         )} />
         <Controller control={control} name="amount" render={({ field }) => (
-          <TextField label="Valor (R$)" placeholder="0,00" keyboardType="decimal-pad" value={field.value} onBlur={field.onBlur} onChangeText={field.onChange} error={errors.amount?.message} />
+          <TextField testID="transaction-amount" label="Valor (R$)" placeholder="0,00" keyboardType="decimal-pad" value={field.value} onBlur={field.onBlur} onChangeText={field.onChange} error={errors.amount?.message} />
         )} />
         <Controller control={control} name="categoryId" render={({ field }) => (
           <SelectField
@@ -118,7 +118,7 @@ export default function TransactionFormScreen() {
           />
         )} />
         <Controller control={control} name="date" render={({ field }) => (
-          <TextField label="Data" placeholder="AAAA-MM-DD" keyboardType="numbers-and-punctuation" value={field.value} onBlur={field.onBlur} onChangeText={field.onChange} helperText="Use o formato AAAA-MM-DD" error={errors.date?.message} />
+          <TextField testID="transaction-date" label="Data" placeholder="AAAA-MM-DD" keyboardType="numbers-and-punctuation" value={field.value} onBlur={field.onBlur} onChangeText={field.onChange} helperText="Use o formato AAAA-MM-DD" error={errors.date?.message} />
         )} />
         {errors.root?.message ? <ThemedText color={colors.danger} variant="caption">{errors.root.message}</ThemedText> : null}
         <Button title={editing ? 'Salvar alterações' : 'Criar transação'} loading={isSubmitting} onPress={() => void onSubmit()} />

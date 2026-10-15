@@ -45,7 +45,7 @@ export default function CategoryFormScreen() {
     <ScreenContainer keyboardAware>
       <ThemedText variant="heading">{id ? 'Edite sua categoria.' : 'Crie uma categoria personalizada.'}</ThemedText>
       <View style={styles.form}>
-        <Controller control={control} name="name" render={({ field }) => <TextField label="Nome" placeholder="Ex.: Cursos" autoCapitalize="sentences" value={field.value} onBlur={field.onBlur} onChangeText={field.onChange} error={errors.name?.message} />} />
+        <Controller control={control} name="name" render={({ field }) => <TextField testID="category-name" label="Nome" placeholder="Ex.: Cursos" autoCapitalize="sentences" value={field.value} onBlur={field.onBlur} onChangeText={field.onChange} error={errors.name?.message} />} />
         <Controller control={control} name="type" render={({ field }) => (
           <ChoiceChips label="Tipo da categoria" value={field.value} onChange={field.onChange} choices={[
             { value: 'despesa_fixa', label: 'Despesa fixa' },

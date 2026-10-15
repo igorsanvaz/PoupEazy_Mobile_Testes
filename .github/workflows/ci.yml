@@ -1,0 +1,48 @@
+# Plano de Testes, seção 10 — validação automática dos testes a cada push e PR para a main.
+# Roda lint, checagem de tipos e a suíte Jest (unitários + integração) com cobertura.
+# Os fluxos E2E (Maestro) precisam de emulador e API de teste; são executados localmente.
+name: CI - Testes
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Rodar o lint
+        run: npm run lint
+
+      - name: Checar tipos (TypeScript)
+        run: npx tsc --noEmit
+
+      - name: Rodar os testes com cobertura
+        run: npx jest --runInBand --coverage --ci
+
+      - name: Publicar relatório de cobertura
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura
+          path: coverage/
+          if-no-files-found: ignore

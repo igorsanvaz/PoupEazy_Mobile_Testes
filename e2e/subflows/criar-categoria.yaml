@@ -1,0 +1,26 @@
+# Subfluxo compartilhado: cria uma categoria personalizada pela tela Mais > Categorias.
+# Parâmetros (env): CATEGORIA_NOME e CATEGORIA_TIPO ("Despesa fixa", "Despesa variável" ou "Receita").
+# Termina na lista de categorias com a nova categoria visível.
+appId: com.wesleyglr.poupeazy
+---
+- tapOn: Mais
+# A aba Mais preserva a pilha: só abre Categorias se ainda não estiver nela.
+- runFlow:
+    when:
+      notVisible: Nova categoria
+    commands:
+      - tapOn: '.*Categorias.*'
+- extendedWaitUntil:
+    visible: Minhas categorias
+    timeout: 30000
+- tapOn: Nova categoria
+- assertVisible: Crie uma categoria personalizada\.
+- tapOn:
+    id: category-name
+- inputText: ${CATEGORIA_NOME}
+- hideKeyboard
+- tapOn: ${CATEGORIA_TIPO}
+- tapOn: Salvar categoria
+- extendedWaitUntil:
+    visible: ${CATEGORIA_NOME}
+    timeout: 30000

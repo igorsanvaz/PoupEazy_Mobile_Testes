@@ -1,0 +1,101 @@
+# Plano de Testes, seção 7.2 — ciclo de vida de uma transação.
+# Executar somente contra API/banco de teste (ver e2e/README.md).
+# Cria, edita e exclui uma despesa e confere lista, painel e orçamento a cada passo.
+appId: com.wesleyglr.poupeazy
+name: Ciclo de vida de uma transação
+---
+- runFlow: subflows/nova-sessao.yaml
+- runFlow:
+    file: subflows/criar-categoria.yaml
+    env:
+      CATEGORIA_NOME: Mercado E2E
+      CATEGORIA_TIPO: Despesa variável
+
+# 1-2. Criar uma despesa no mês atual (a data padrão do formulário é hoje).
+- tapOn: Transações
+- extendedWaitUntil:
+    visible: Nenhuma transação
+    timeout: 30000
+- tapOn: Nova transação
+- assertVisible: Registre uma nova movimentação
+- tapOn:
+    id: transaction-description
+- inputText: Compra E2E
+- tapOn:
+    id: transaction-amount
+- inputText: 123,45
+- hideKeyboard
+- tapOn: 'Categoria: .*'
+- tapOn: Mercado E2E
+- assertVisible: 'Categoria: Mercado E2E'
+- scrollUntilVisible:
+    element: Criar transação
+    direction: DOWN
+- tapOn: Criar transação
+- extendedWaitUntil:
+    visible: Compra E2E
+    timeout: 30000
+- assertVisible: 1 resultado\(s\)
+- assertVisible: '\+?−? ?R\$.123,45'
+
+# 5. Painel e orçamento refletem a despesa criada.
+- tapOn: Início
+- extendedWaitUntil:
+    visible: Compra E2E
+    timeout: 30000
+- tapOn: Orçamento
+- extendedWaitUntil:
+    visible: Despesas por categoria
+    timeout: 30000
+- assertVisible: Mercado E2E
+- assertVisible: 'R\$.123,45'
+
+# 3. Editar valor e descrição; a lista deve refletir a alteração.
+- tapOn: Transações
+- tapOn: Compra E2E
+- extendedWaitUntil:
+    visible: Edite os dados da movimentação
+    timeout: 30000
+- tapOn:
+    id: transaction-description
+- eraseText
+- inputText: Compra E2E editada
+- tapOn:
+    id: transaction-amount
+- eraseText
+- inputText: 200,00
+- hideKeyboard
+- scrollUntilVisible:
+    element: Salvar alterações
+    direction: DOWN
+- tapOn: Salvar alterações
+- extendedWaitUntil:
+    visible: Compra E2E editada
+    timeout: 30000
+- assertVisible: '\+?−? ?R\$.200,00'
+- assertNotVisible: '\+?−? ?R\$.123,45'
+
+- tapOn: Orçamento
+- extendedWaitUntil:
+    visible: 'R\$.200,00'
+    timeout: 30000
+
+# 4. Excluir com toque longo e confirmar no alerta.
+- tapOn: Transações
+- longPressOn: Compra E2E editada
+- assertVisible: Excluir transação\?
+- tapOn: '(?i)excluir'
+- extendedWaitUntil:
+    visible: Nenhuma transação
+    timeout: 30000
+- assertNotVisible: Compra E2E editada
+
+# 5. Totais voltam a zero no painel e no orçamento.
+- tapOn: Início
+- extendedWaitUntil:
+    visible: Tudo tranquilo por aqui
+    timeout: 30000
+- tapOn: Orçamento
+- extendedWaitUntil:
+    notVisible: Despesas por categoria
+    timeout: 30000

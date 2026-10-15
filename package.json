@@ -60,14 +60,19 @@
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
     "postinstall": "patch-package",
     "test": "jest --runInBand",
     "test:auth": "jest --runInBand --runTestsByPath __tests__/auth-context.test.tsx",
+    "test:e2e": "maestro test --test-output-dir .tmp/maestro e2e/",
     "test:e2e:auth": "maestro test --test-output-dir .tmp/maestro e2e/auth.yaml",
+    "test:e2e:transacoes": "maestro test --test-output-dir .tmp/maestro e2e/transacoes.yaml",
+    "test:e2e:orcamentos": "maestro test --test-output-dir .tmp/maestro e2e/orcamentos-categorias.yaml",
+    "test:e2e:metas": "maestro test --test-output-dir .tmp/maestro e2e/metas-open-finance.yaml",
+    "test:coverage": "jest --runInBand --coverage",
     "test:watch": "jest --watch"
   },
   "jest": {

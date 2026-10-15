@@ -1,5 +1,7 @@
 # PoupEazy Mobile - Gestão Financeira Pessoal
 
+![CI](https://github.com/Wesley-GLR/PoupEazy_Mobile/actions/workflows/ci.yml/badge.svg)
+
 Aplicativo móvel de gerenciamento financeiro pessoal desenvolvido como continuação do projeto
 acadêmico da disciplina de **Análise e Desenvolvimento de Software IV** da
 **UNIFEI - Campus Itabira**.
@@ -203,8 +205,9 @@ EXPO_PUBLIC_API_URL=https://outro-endereco.example.com/api
 
 ```text
 PoupEazy_Mobile/
-├── __tests__/              # Testes unitários e integração do contexto de autenticação
-├── e2e/                    # Fluxo Maestro de autenticação e instruções de execução
+├── .github/workflows/      # CI: lint, tipos e testes Jest a cada push/PR
+├── __tests__/              # Testes unitários e de integração (Jest)
+├── e2e/                    # Fluxos Maestro (E2E) e instruções de execução
 ├── assets/
 │   ├── brand/              # Logotipos do PoupEazy
 │   ├── fonts/              # Fontes usadas pelo design system
@@ -276,19 +279,37 @@ development build Android e será validado antes da fase de publicação.
 
 ## Qualidade e verificações
 
-Os testes de autenticação das seções 6.1 e 7.1 do plano estão disponíveis:
+O plano de testes (`Plano_de_Testes_PoupEazy.pdf`) está implementado por completo:
+
+| Tipo | Arquivo | Cobre |
+|------|---------|-------|
+| Unitário | `__tests__/services-budgets-goals.test.ts` | Serviços de orçamentos e metas (5.1) |
+| Unitário | `__tests__/token-storage.test.ts` | Token de sessão no SecureStore e na web (5.2) |
+| Unitário | `__tests__/format-edge-cases.test.ts` | Casos-limite de moeda e datas (5.3) |
+| Unitário | `__tests__/services-integrations.test.ts` | Serviços de Open Finance/Pluggy e `queryString` (5.4) |
+| Integração | `__tests__/auth-context.test.tsx` | Contexto de autenticação (6.1) |
+| Integração | `__tests__/hooks-transactions.test.tsx` | Hooks de React Query e invalidação de cache (6.2) |
+| Integração | `__tests__/transaction-form.test.tsx` | Formulário de transação com Zod (6.3) |
+| Integração | `__tests__/budget-goal-form.test.tsx` | Formulários de orçamento, meta e movimentação (6.4) |
+| E2E | `e2e/auth.yaml` | Autenticação (7.1) |
+| E2E | `e2e/transacoes.yaml` | Ciclo de vida da transação (7.2) |
+| E2E | `e2e/orcamentos-categorias.yaml` | Orçamentos e categorias (7.3) |
+| E2E | `e2e/metas-open-finance.yaml` | Metas e Open Finance (7.4) |
 
 ```bash
-# Integração do AuthProvider com React Query (7 cenários, serviços simulados)
-npm run test:auth
-
-# E2E Android com Maestro, aplicativo e API reais em ambiente de teste
-npm run test:e2e:auth
+npm test                    # unitários + integração (Jest)
+npm run test:coverage       # idem, com relatório em coverage/
+npm run test:e2e            # todos os fluxos Maestro (exige emulador e API de teste)
+npm run test:e2e:transacoes # ou um fluxo por vez: :auth, :transacoes, :orcamentos, :metas
 ```
 
-O E2E exige preparação do Android e da API. Consulte [o guia de autenticação](e2e/README.md)
-antes de executar. O fluxo foi preparado para execução posterior; ainda não foi validado em
-dispositivo. O `npm test` executa os testes Jest, sem iniciar o E2E.
+Os fluxos E2E exigem preparação do Android e da API. Consulte [o guia do E2E](e2e/README.md)
+antes de executar. Os fluxos de autenticação, transações e orçamentos/categorias passaram no
+emulador Android; o de metas passou até a etapa de Open Finance, que exige credenciais sandbox da
+Pluggy na API de teste. O `npm test` executa somente os testes Jest, sem iniciar o E2E.
+
+O workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) roda lint, `tsc` e a suíte
+Jest com cobertura a cada push e pull request para a `main`.
 
 ```bash
 npx tsc --noEmit
@@ -300,7 +321,7 @@ npx expo export --platform android --output-dir dist-qa
 
 A validação local da versão atual concluiu:
 
-- 44 testes automatizados (37 unitários e 7 cenários de integração de autenticação);
+- 141 testes automatizados em 12 suítes Jest (unitários e de integração);
 - 21 verificações do Expo Doctor;
 - exportação do bundle Android;
 - fluxos principais no Expo Go e emulador Android;

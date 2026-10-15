@@ -1,0 +1,10 @@
+# Subfluxo compartilhado: usar logo após cada launchApp.
+# Em alguns lançamentos a animação de saída da splash (starting_reveal) fica presa no
+# Android e a tela nunca fica "ociosa": cada ação do Maestro passa a esperar ~10 s e a
+# digitação trava. Ir para segundo plano e voltar encerra a animação sem perder o estado.
+appId: com.wesleyglr.poupeazy
+---
+- pressKey: Home
+- launchApp:
+    clearState: false
+    stopApp: false

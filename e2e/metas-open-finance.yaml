@@ -1,0 +1,170 @@
+# Plano de Testes, seção 7.4 — metas e Open Finance.
+# Executar somente contra API/banco de teste (ver e2e/README.md).
+# A parte de Open Finance exige o backend configurado com credenciais SANDBOX da Pluggy.
+# As credenciais abaixo são as de teste públicas do conector "Pluggy Bank" (sandbox);
+# o widget só lista conectores sandbox em build debug (includeSandbox={__DEV__}).
+appId: com.wesleyglr.poupeazy
+name: Metas e Open Finance
+env:
+  PLUGGY_CONNECTOR: Pluggy Bank
+  PLUGGY_USER: user-ok
+  PLUGGY_PASSWORD: password-ok
+---
+- evalScript: ${output.prazoMeta = (new Date().getFullYear() + 1) + '-12-31'}
+- runFlow: subflows/nova-sessao.yaml
+- runFlow:
+    file: subflows/criar-categoria.yaml
+    env:
+      CATEGORIA_NOME: Reserva E2E
+      CATEGORIA_TIPO: Despesa variável
+- runFlow:
+    file: subflows/criar-categoria.yaml
+    env:
+      CATEGORIA_NOME: Resgate E2E
+      CATEGORIA_TIPO: Receita
+
+# 1. Criar meta com valor-alvo e prazo.
+- tapOn: Metas
+- extendedWaitUntil:
+    visible: Sua próxima conquista começa aqui
+    timeout: 30000
+- tapOn: Nova meta
+- assertVisible: Qual é a sua próxima conquista\?
+- tapOn:
+    id: goal-name
+- inputText: Viagem E2E
+- tapOn:
+    id: goal-target
+- inputText: 1.000,00
+- tapOn:
+    id: goal-deadline
+- inputText: ${output.prazoMeta}
+- hideKeyboard
+- scrollUntilVisible:
+    element: Criar meta
+    direction: DOWN
+- tapOn: Criar meta
+- extendedWaitUntil:
+    visible: Viagem E2E
+    timeout: 30000
+- assertVisible: 'R\$.0,00 de R\$.1\.000,00'
+
+# 2. Aporte aumenta o progresso.
+- tapOn: '\+ Registrar aporte ou retirada'
+- assertVisible: Aporte aumenta o progresso; retirada reduz o valor guardado\.
+- tapOn:
+    id: goal-movement-amount
+- inputText: 250,00
+- hideKeyboard
+- tapOn: 'Categoria: .*'
+- tapOn: Reserva E2E
+- scrollUntilVisible:
+    element: Confirmar movimentação
+    direction: DOWN
+- tapOn: Confirmar movimentação
+- extendedWaitUntil:
+    visible: 'R\$.250,00 de R\$.1\.000,00'
+    timeout: 30000
+- assertVisible: Últimas movimentações
+- assertVisible: Aporte na meta
+
+# Retirada reduz o valor guardado.
+- tapOn: '\+ Registrar aporte ou retirada'
+- tapOn: Retirada
+- tapOn:
+    id: goal-movement-amount
+- inputText: 50,00
+- hideKeyboard
+- tapOn: 'Categoria: .*'
+- assertNotVisible: Reserva E2E
+- tapOn: Resgate E2E
+- scrollUntilVisible:
+    element: Confirmar movimentação
+    direction: DOWN
+- tapOn: Confirmar movimentação
+- extendedWaitUntil:
+    visible: 'R\$.200,00 de R\$.1\.000,00'
+    timeout: 30000
+- assertVisible: Retirada da meta
+
+# 3. Abrir Open Finance e conectar o conector sandbox pela Pluggy.
+- tapOn: Mais
+# A aba Mais ainda está em Categorias (subfluxo anterior): volta ao menu primeiro.
+- runFlow:
+    when:
+      notVisible: '.*Open Finance.*'
+    commands:
+      - back
+- tapOn: '.*Open Finance.*'
+- extendedWaitUntil:
+    visible: Nenhuma conta conectada
+    timeout: 30000
+- tapOn: Conectar instituição
+
+# O widget da Pluggy é uma WebView de terceiros; os textos podem mudar com versões
+# do widget. Ajuste os seletores abaixo se a Pluggy alterar a interface.
+- extendedWaitUntil:
+    visible: '(?i).*(institui|banco|conect).*'
+    timeout: 60000
+- runFlow:
+    when:
+      visible: '(?i)(continuar|come[cç]ar|aceitar.*)'
+    commands:
+      - tapOn: '(?i)(continuar|come[cç]ar|aceitar.*)'
+- scrollUntilVisible:
+    element: '(?i).*${PLUGGY_CONNECTOR}.*'
+    direction: DOWN
+    timeout: 60000
+- tapOn: '(?i).*${PLUGGY_CONNECTOR}.*'
+- extendedWaitUntil:
+    visible: '(?i).*(usu[aá]rio|user|login|cpf).*'
+    timeout: 60000
+- tapOn: '(?i).*(usu[aá]rio|user|login|cpf).*'
+- inputText: ${PLUGGY_USER}
+- tapOn: '(?i).*(senha|password).*'
+- inputText: ${PLUGGY_PASSWORD}
+- hideKeyboard
+- tapOn: '(?i)(conectar|continuar|enviar|entrar)'
+
+# Após o sucesso, o app salva a integração e sincroniza automaticamente.
+- extendedWaitUntil:
+    visible: Sincronização concluída
+    timeout: 180000
+- assertVisible: '\d+ nova\(s\), \d+ atualizada\(s\) e \d+ já estavam em dia\.'
+- tapOn: '(?i)ok'
+- extendedWaitUntil:
+    visible: ${PLUGGY_CONNECTOR}
+    timeout: 30000
+- assertVisible: Ativa
+- assertNotVisible: Nenhuma conta conectada
+
+# 4. Sincronização manual e transações importadas visíveis no mês atual.
+- tapOn: Sincronizar agora
+- extendedWaitUntil:
+    visible: Sincronização concluída
+    timeout: 180000
+- tapOn: '(?i)ok'
+- tapOn: Transações
+- tapOn: Todas
+- extendedWaitUntil:
+    visible: '[1-9]\d* resultado\(s\)'
+    timeout: 30000
+- assertNotVisible: Nenhuma transação
+
+# 5. Desconectar: a integração some da lista.
+- tapOn: Mais
+- extendedWaitUntil:
+    visible: Contas em um só lugar
+    timeout: 30000
+- scrollUntilVisible:
+    element: Desconectar
+    direction: DOWN
+- tapOn: Desconectar
+- assertVisible: Desconectar instituição\?
+- tapOn:
+    text: '(?i)desconectar'
+    below: 'A conexão com .*'
+- extendedWaitUntil:
+    visible: Nenhuma conta conectada
+    timeout: 30000
+- assertNotVisible: Sincronizar agora

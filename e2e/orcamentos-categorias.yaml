@@ -1,0 +1,152 @@
+# Plano de Testes, seção 7.3 — orçamentos e categorias.
+# Executar somente contra API/banco de teste (ver e2e/README.md).
+appId: com.wesleyglr.poupeazy
+name: Orçamentos e categorias
+---
+- runFlow: subflows/nova-sessao.yaml
+
+# 1. Categoria personalizada aparece no seletor da transação.
+- runFlow:
+    file: subflows/criar-categoria.yaml
+    env:
+      CATEGORIA_NOME: Cursos E2E
+      CATEGORIA_TIPO: Despesa variável
+- tapOn: Transações
+- tapOn: Nova transação
+- tapOn: 'Categoria: .*'
+- assertVisible: Cursos E2E
+- assertVisible: Personalizada
+- tapOn: Fechar
+- scrollUntilVisible:
+    element: Cancelar
+    direction: DOWN
+- tapOn: Cancelar
+
+# 2. Navegar pelos meses e criar o orçamento do mês atual.
+- tapOn: Orçamento
+- extendedWaitUntil:
+    visible: Defina um limite para o mês
+    timeout: 30000
+- tapOn: Mês anterior
+- assertVisible: Defina um limite para o mês
+- tapOn: Próximo mês
+- tapOn: Próximo mês
+- assertVisible: Defina um limite para o mês
+- tapOn: Toque para voltar ao mês atual
+- tapOn: Criar orçamento
+- assertVisible: Defina quanto pretende gastar no mês\.
+- tapOn:
+    id: budget-amount
+- inputText: '1000'
+- hideKeyboard
+- tapOn: Salvar orçamento
+- extendedWaitUntil:
+    visible: Consumo do orçamento
+    timeout: 30000
+- assertVisible: 0%
+- assertVisible: 'R\$.0,00 de R\$.1\.000,00'
+
+# 3. Despesas movem a barra de progresso; acima do limite, aparece o excesso.
+- tapOn: Transações
+- tapOn: Nova transação
+- tapOn:
+    id: transaction-description
+- inputText: Curso de inglês E2E
+- tapOn:
+    id: transaction-amount
+- inputText: 850,00
+- hideKeyboard
+- tapOn: 'Categoria: .*'
+- tapOn: Cursos E2E
+- scrollUntilVisible:
+    element: Criar transação
+    direction: DOWN
+- tapOn: Criar transação
+- extendedWaitUntil:
+    visible: Curso de inglês E2E
+    timeout: 30000
+- tapOn: Orçamento
+- extendedWaitUntil:
+    visible: 85%
+    timeout: 30000
+
+- tapOn: Transações
+- tapOn: Nova transação
+- tapOn:
+    id: transaction-description
+- inputText: Livros E2E
+- tapOn:
+    id: transaction-amount
+- inputText: 300,00
+- hideKeyboard
+- tapOn: 'Categoria: .*'
+- tapOn: Cursos E2E
+- scrollUntilVisible:
+    element: Criar transação
+    direction: DOWN
+- tapOn: Criar transação
+- extendedWaitUntil:
+    visible: Livros E2E
+    timeout: 30000
+- tapOn: Orçamento
+- extendedWaitUntil:
+    visible: 115%
+    timeout: 30000
+- assertVisible: 'O limite foi excedido em R\$.150,00\.'
+
+# 2. Ajustar o orçamento existente: 1.150 de 2.000 = 57% (57,4999… em ponto flutuante, arredondado).
+- tapOn: 'Editar orçamento de .*'
+- tapOn:
+    id: budget-amount
+- eraseText
+- inputText: '2000'
+- hideKeyboard
+- tapOn: Salvar orçamento
+- extendedWaitUntil:
+    visible: 57%
+    timeout: 30000
+- assertNotVisible: 'O limite foi excedido.*'
+
+# 4. Editar categoria personalizada.
+- tapOn: Mais
+- runFlow:
+    when:
+      notVisible: Nova categoria
+    commands:
+      - tapOn: '.*Categorias.*'
+- tapOn: Editar Cursos E2E
+- assertVisible: Edite sua categoria\.
+- tapOn:
+    id: category-name
+- eraseText
+- inputText: Educação E2E
+- hideKeyboard
+- tapOn: Salvar categoria
+- extendedWaitUntil:
+    visible: Educação E2E
+    timeout: 30000
+- assertNotVisible: Cursos E2E
+
+# 4. Excluir uma categoria sem uso.
+- runFlow:
+    file: subflows/criar-categoria.yaml
+    env:
+      CATEGORIA_NOME: Temporaria E2E
+      CATEGORIA_TIPO: Despesa fixa
+- tapOn: Excluir Temporaria E2E
+- assertVisible: Excluir categoria\?
+- tapOn: '(?i)excluir'
+- extendedWaitUntil:
+    notVisible: Temporaria E2E
+    timeout: 30000
+
+# 4. Categorias do sistema não têm ações de edição/exclusão: os únicos botões
+#    "Editar …"/"Excluir …" da tela são os da categoria personalizada restante.
+- scrollUntilVisible:
+    element: Categorias PoupEazy
+    direction: DOWN
+- assertVisible: PoupEazy
+- scroll
+- scroll
+- assertNotVisible: 'Excluir (?!Educação E2E$).*'
+- assertNotVisible: 'Editar (?!Educação E2E$).*'

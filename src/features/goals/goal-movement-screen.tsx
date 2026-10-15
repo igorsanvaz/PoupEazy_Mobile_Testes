@@ -70,9 +70,9 @@ export default function GoalMovementScreen() {
         <ChoiceChips label="Tipo de movimentação" value={field.value} onChange={field.onChange} choices={[{ value: 'despesa', label: 'Aporte' }, { value: 'receita', label: 'Retirada' }]} />
       )} />
       <View style={styles.form}>
-        <Controller control={control} name="amount" render={({ field }) => <TextField label="Valor (R$)" placeholder="0,00" keyboardType="decimal-pad" value={field.value} onBlur={field.onBlur} onChangeText={field.onChange} error={errors.amount?.message} />} />
-        <Controller control={control} name="date" render={({ field }) => <TextField label="Data" placeholder="AAAA-MM-DD" keyboardType="numbers-and-punctuation" value={field.value} onBlur={field.onBlur} onChangeText={field.onChange} error={errors.date?.message} />} />
-        <Controller control={control} name="description" render={({ field }) => <TextField label="Descrição (opcional)" autoCapitalize="sentences" value={field.value} onBlur={field.onBlur} onChangeText={field.onChange} error={errors.description?.message} />} />
+        <Controller control={control} name="amount" render={({ field }) => <TextField testID="goal-movement-amount" label="Valor (R$)" placeholder="0,00" keyboardType="decimal-pad" value={field.value} onBlur={field.onBlur} onChangeText={field.onChange} error={errors.amount?.message} />} />
+        <Controller control={control} name="date" render={({ field }) => <TextField testID="goal-movement-date" label="Data" placeholder="AAAA-MM-DD" keyboardType="numbers-and-punctuation" value={field.value} onBlur={field.onBlur} onChangeText={field.onChange} error={errors.date?.message} />} />
+        <Controller control={control} name="description" render={({ field }) => <TextField testID="goal-movement-description" label="Descrição (opcional)" autoCapitalize="sentences" value={field.value} onBlur={field.onBlur} onChangeText={field.onChange} error={errors.description?.message} />} />
         <Controller control={control} name="categoryId" render={({ field }) => <SelectField label="Categoria" value={field.value} onChange={field.onChange} options={categories.map((item) => ({ label: item.nome, value: item.id }))} error={errors.categoryId?.message} />} />
         {errors.root?.message ? <ThemedText color={colors.danger} variant="caption">{errors.root.message}</ThemedText> : null}
         <Button title="Confirmar movimentação" loading={isSubmitting} onPress={() => void onSubmit()} />

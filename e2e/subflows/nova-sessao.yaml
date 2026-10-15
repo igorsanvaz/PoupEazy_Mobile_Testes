@@ -1,0 +1,73 @@
+# Subfluxo compartilhado: abre o app limpo, cadastra um usuário exclusivo pela UI
+# e entra no painel. Deixa o e-mail em output.e2eEmail para o fluxo chamador.
+# Mesma estratégia de e2e/auth.yaml: executar somente contra API/banco de teste.
+appId: com.wesleyglr.poupeazy
+---
+- evalScript: ${output.e2eEmail = 'e2e.fluxo.' + Date.now() + '.' + Math.floor(Math.random() * 1000000) + '@example.com'}
+
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: login-email
+    timeout: 60000
+- runFlow: destravar-splash.yaml
+- extendedWaitUntil:
+    visible:
+      id: login-email
+    timeout: 30000
+
+- scrollUntilVisible:
+    element: Cadastre-se
+    direction: DOWN
+- tapOn: Cadastre-se
+- assertVisible: Registre-se
+- tapOn:
+    id: register-name
+- inputText: Usuario E2E
+- tapOn:
+    id: register-email
+- inputText: ${output.e2eEmail}
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: register-password
+    direction: DOWN
+- tapOn:
+    id: register-password
+- inputText: E2eInicial123!
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: register-confirmation
+    direction: DOWN
+- tapOn:
+    id: register-confirmation
+- inputText: E2eInicial123!
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      text: Criar conta
+    direction: DOWN
+- tapOn: Criar conta
+- extendedWaitUntil:
+    visible:
+      id: login-email
+    timeout: 60000
+
+- tapOn:
+    id: login-email
+- eraseText
+- inputText: ${output.e2eEmail}
+- tapOn:
+    id: login-password
+- eraseText
+- inputText: E2eInicial123!
+- hideKeyboard
+- scrollUntilVisible:
+    element: Entrar
+    direction: DOWN
+- tapOn: Entrar
+- extendedWaitUntil:
+    visible: Painel principal
+    timeout: 60000

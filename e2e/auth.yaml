@@ -13,6 +13,7 @@ name: Autenticação de ponta a ponta
     visible:
       id: login-email
     timeout: 60000
+- runFlow: subflows/destravar-splash.yaml
 - assertNotVisible: Painel principal
 - tapOn:
     id: login-email
@@ -99,6 +100,7 @@ name: Autenticação de ponta a ponta
 - extendedWaitUntil:
     visible: Painel principal
     timeout: 60000
+- runFlow: subflows/destravar-splash.yaml
 - assertVisible: Bem-vindo de volta, Usuario\.
 - assertNotVisible:
     id: login-email
@@ -126,6 +128,7 @@ name: Autenticação de ponta a ponta
     visible:
       id: login-email
     timeout: 60000
+- runFlow: subflows/destravar-splash.yaml
 - assertNotVisible: Painel principal
 
 # Recuperação local completa: a API devolve resetToken ao build debug.
@@ -187,9 +190,21 @@ name: Autenticação de ponta a ponta
 - assertNotVisible: Painel principal
 
 # A nova senha deve autenticar a mesma conta; concluir sem sessão ativa.
+# Reabre o app para partir de um formulário vazio: o Maestro toca no meio do campo e o
+# eraseText só apaga o que está antes do cursor, então sobraria o final da senha anterior.
+- stopApp
+- launchApp:
+    clearState: false
+- extendedWaitUntil:
+    visible:
+      id: login-email
+    timeout: 60000
+- runFlow: subflows/destravar-splash.yaml
+- tapOn:
+    id: login-email
+- inputText: ${output.authEmail}
 - tapOn:
     id: login-password
-- eraseText
 - inputText: E2eAtualizada456!
 - hideKeyboard
 - scrollUntilVisible:

@@ -59,10 +59,10 @@ export default function BudgetFormScreen() {
           />
         )} />
         <Controller control={control} name="year" render={({ field }) => (
-          <TextField label="Ano" keyboardType="number-pad" maxLength={4} editable={!budget} value={field.value} onBlur={field.onBlur} onChangeText={field.onChange} error={errors.year?.message} />
+          <TextField testID="budget-year" label="Ano" keyboardType="number-pad" maxLength={4} editable={!budget} value={field.value} onBlur={field.onBlur} onChangeText={field.onChange} error={errors.year?.message} />
         )} />
         <Controller control={control} name="amount" render={({ field }) => (
-          <TextField label="Valor planejado (R$)" placeholder="0,00" keyboardType="decimal-pad" value={field.value} onBlur={field.onBlur} onChangeText={field.onChange} error={errors.amount?.message} />
+          <TextField testID="budget-amount" label="Valor planejado (R$)" placeholder="0,00" keyboardType="decimal-pad" value={field.value} onBlur={field.onBlur} onChangeText={field.onChange} error={errors.amount?.message} />
         )} />
         {errors.root?.message ? <ThemedText color={colors.danger} variant="caption">{errors.root.message}</ThemedText> : null}
         <Button title="Salvar orçamento" loading={isSubmitting} onPress={() => void onSubmit()} />
